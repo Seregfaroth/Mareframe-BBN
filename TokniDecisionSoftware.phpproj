@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Name>TokniDecisionSoftware</Name>
+    <ProjectGuid>421021d5-9961-4f86-b523-8aa972ab3e64</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>TokniDecisionSoftware</RootNamespace>
+    <ProjectTypeGuids>{A0786B88-2ADB-4C21-ABE8-AA2D79766269}</ProjectTypeGuids>
+    <AssemblyName>TokniDecisionSoftware</AssemblyName>
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+    <Server>PHPDev</Server>
+    <PublishEvent>None</PublishEvent>
+    <PHPDevAutoPort>True</PHPDevAutoPort>
+    <PHPDevPort>36584</PHPDevPort>
+    <PHPDevHostName>localhost</PHPDevHostName>
+    <IISProjectUrl>http://localhost:36584/</IISProjectUrl>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <IncludeDebugInformation>true</IncludeDebugInformation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <IncludeDebugInformation>false</IncludeDebugInformation>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="MCA.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="jQueryUI\jquery-ui.css" />
+    <Content Include="jQueryUI\jquery-ui.js" />
+    <Content Include="jQueryUI\jquery-ui.min.css" />
+    <Content Include="jQueryUI\jquery-ui.min.js" />
+    <Content Include="jQueryUI\jquery-ui.structure.css" />
+    <Content Include="jQueryUI\jquery-ui.structure.min.css" />
+    <Content Include="jQueryUI\jquery-ui.theme.css" />
+    <Content Include="jQueryUI\jquery-ui.theme.min.css" />
+    <Content Include="jQueryUI\jquery.js" />
+    <Content Include="JSON\baltic.json" />
+    <Content Include="JSON\blackSea.json" />
+    <Content Include="JSON\cadiz.json" />
+    <Content Include="JSON\Iceland.json" />
+    <Content Include="JSON\northSea.json" />
+    <Content Include="JSON\scotland.json" />
+    <Content Include="JSON\sicily.json" />
+    <Content Include="js\Mareframe.js" />
+    <Content Include="js\MareframeGUI.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="jQueryUI\" />
+    <Folder Include="JSON\" />
+    <Folder Include="js\" />
+  </ItemGroup>
+</Project>
