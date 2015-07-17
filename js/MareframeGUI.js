@@ -202,16 +202,38 @@
 	$("#detailsDialog").dialog({
 	    title: elmt.getName()
 	});
+	
+	//Store element that opened the dialog
+	$("#detailsDialog").data("element",elmt);
+	
 	// console.log("data: " + elmt.getData());
-	// console.log("string: " + this.htmlTableFromArray(elmt.getData()));
+	// console.log("string: " + this.htmlTableFromArray("Definition", elmt.getData()));
 
-	var s = this.htmlTableFromArray(elmt.getData());
+	var s = this.htmlTableFromArray("Definition", elmt.getData());
 	$("#defTable_div").html(s);
 	$("#defTable_div").show();
 
 	//set description
 	document.getElementById("description_div").innerHTML = elmt.getDescription();
+	$("#description_div").show();
+	
+	$("#values").prop('disabled', false);
+	
     }
+
+
+	this.showValues = function() {
+		var elmt = $("#detailsDialog").data("element");
+		elmt.updateValueArray(elmt);	
+		console.log(this.htmlTableFromArray("Values", [[1],[1]]));
+		$("#valuesTable_div").html(this.htmlTableFromArray("Values", elmt.getValues()));
+		$("#valuesTable_div").show();
+		$("#values").prop('disabled', true);
+	}
+
+	$("#detailsDialog").on('dialogclose', function(event) {
+     	$("#valuesTable_div").hide();
+ 	});
 
     function updateValFnCP(cPX,cPY)
     {
@@ -519,10 +541,10 @@
 	selectedItems = [];
 	update = true;
     }
-    this.htmlTableFromArray = function(data) {
+    this.htmlTableFromArray = function(header, data) {
     	console.log(data);
     	var numOfHeaderRows = this.numOfHeaderRows(data);
-    	var htmlString = this.createHeaderTable(data);
+    	var htmlString = this.createHeaderTable(header,data);
     	for (var i = numOfHeaderRows; i < data.length; i++) {
     		htmlString += "<tr>";
     		for (var j = 0; j < data[i].length; j++) {
@@ -545,11 +567,19 @@
     	return htmlString;
     }
     
-    this.createHeaderTable = function(data) {
+    this.createHeaderTable = function(header, data) {
     	var numOfHeaderRows = this.numOfHeaderRows(data);
     	var numOfCellsInRow;
     	var expNumOfCellsInRow;
     	var htmlString = "";
+    	if (data[data.length - 1] !== undefined) {
+    		htmlString += "<tr><th style='text-align:center' colspan=\"" + data[data.length - 1].length +"\">"+ header + " </th></tr>";
+    	}
+    	else {
+    		htmlString += "<tr><th style='text-align:center'>"+ header + " </th></tr>";
+    	}
+    	
+    	
     	for (var i = 0; i < numOfHeaderRows; i++) {
     		numOfCellsInRow = 0;
     		htmlString += "<tr>";
@@ -585,6 +615,5 @@
     		}
     	}
     	return counter;
-    }
-     
+    }  
 }

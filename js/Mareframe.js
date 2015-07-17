@@ -486,8 +486,8 @@ MareFrame.DST.Element = function ()
     var name = "Element";
     var description = "write description here";
     var type = 1
-    var weightingMethod = 1;
     var connections = [];
+    var values = [];
     
     this.getData = function ()
     {
@@ -535,6 +535,16 @@ MareFrame.DST.Element = function ()
     this.setMethod = function (i) {
     	weightingMethod = i;
     }
+    
+    this.getValues = function ()
+    {
+        return values;
+    }
+    this.setValues = function (v)
+    {
+        values = v;
+    }
+    
 
     this.deleteConnection = function (id) {
     	var key = 0;
@@ -564,6 +574,18 @@ MareFrame.DST.Element = function ()
     }
     this.getConnections = function () {
     	return connections;
+    }
+    
+    this.updateValueArray = function(e) {
+    	var values = e.getValues();
+    	this.getConnections().forEach(function(c) {
+    		if (c.getOutput().getName() === e.getName()) {
+    			var inputElmt = c.getInput();
+    			var newRow = inputElmt.getMainValues();
+    			values.unshift(newRow);
+    		}
+    	})
+    	//TODO calculate values
     }
     
     this.updateData = function (e) {

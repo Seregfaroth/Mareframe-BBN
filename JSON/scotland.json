@@ -6,7 +6,7 @@
         																																					["Moderate", 0.4, 0.3],
         																																					["Poor", 0.2, 0.6] ]},
         { "posX": 300, "posY": 96, "elmtID": "elmtDec1", "elmtName": "Investment decision", "elmtDesc": "write description here", "elmtType": 1, "defData": [["Invest"], ["DoNotInvest"]]},
-        { "posX": 300, "posY": 224, "elmtID": "elmtValue1", "elmtName": "Financial Gain", "elmtDesc": "write description here", "elmtType": 2, "defData": [["Value", 10000, 500, -5000, 500]]}
+        { "posX": 300, "posY": 224, "elmtID": "elmtValue1", "elmtName": "Financial Gain", "elmtDesc": "write description here", "elmtType": 2, "defData": [["Value", 10000, -5000, 500, 500]]}
     ],
     "connections": [
         { "connInput": "elmtChance1", "connOutput": "elmtChance2", "connID": "conn1" },

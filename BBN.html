@@ -2,7 +2,7 @@
 <html lang="us">
 <head>
     <meta charset="utf-8">
-    <title>MCA Tool</title>
+    <title>BBN Tool</title>
     
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -38,7 +38,7 @@
 				<div class="row">
 					<div class="col-xs-12">
 						<a href="index.html"><img src="img/europe.jpg" class="img-thumbnail europe-map-back"></a>
-						<p id="model_description">This is the Mareframe MCA tool. Data has been loaded into the table on the right. You may doubleclick on each element below, to access the properties panel for that element. If you doubleclick on one of the red or green elements, you may adjust the weights of it's child elements, and thus the data it points to. In the chart at the bottom, you will see the result of the analysis, with the tallest column being the highest scoring one.</p>
+						<p id="model_description">This is the Mareframe BBN tool. You may doubleclick on each element below, to access the properties tables for that element.</p>
 					</div>
 				</div>
 			</div>
@@ -75,10 +75,11 @@
 
     <!--Popup Dialog-->
     <div id="detailsDialog">
-        
-        <div id="defTable_div" contenteditable="false"></div>
-        <div id="description_div"></div>
-        
+        <div id="description_div"></div>  
+        <div id="defTable_div"></div>
+        <button class="dialogButton" id="submit">Submit</button>
+        <button class="dialogButton" id="values" 'disabled'=false onclick="h.gui.showValues();">Show values</button>
+        <div id="valuesTable_div"></div>
     </div>
     <script src="jQueryUI\jquery-ui.js"></script>
     <script>
@@ -105,23 +106,14 @@
             },
             buttons: {
                 Close: function () {
+                	$("#valuesTable_div").hide();
                     $(this).dialog("close");
-                    $("#weightingMethodSelector").hide();
-                    $("#valueFN_div").hide();
-                    $("#sliders_div").hide();
-                    $("#datatable_div").hide();
-                    $("#description_div").hide();
-                    $("#chart_div").hide();
                 },
             }
         
         });
-        $("#weightingMethodSelector").hide();
-        $("#valueFN_div").hide();
-        $("#sliders_div").hide();
-        $("#datatable_div").hide();
         $("#description_div").hide();
-        $("#chart_div").hide();
+		$("#valuesTable_div").hide();
 
     
     </script>
