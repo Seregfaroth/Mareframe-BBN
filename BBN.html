@@ -50,10 +50,11 @@
 		<input class="advbutton" type="checkbox" id="editorMode" onClick="h.gui.setEditorMode(this);">
 		<label for="editorMode">Editor Mode</label>
 		<button class="advButton" id="reset" onclick="h.reset()">Reset</button>
+		<button class="advButton" id="update" onclick="h.getActiveModel().update()">Update</button>
     <div class="ui-widget ui-dialog ui-corner-all ui-widget-content header-bar" style="position: static">
         <div class="ui-widget-header ui-corner-all ui-dialog-titlebar" id="modelHeader">Model</div>
 
-
+ 
         <div style="padding: 1em 1em 0.5em 1.4em; font-size: 0.7em">
             <button class="advButton" id="newDcmt" onclick="h.addNewModel()">New Document</button>
             <button class="advButton" id="lodDcmt" onclick="h.fileHandler.QuickLoad();">Open Document</button>
@@ -76,8 +77,10 @@
     <!--Popup Dialog-->
     <div id="detailsDialog">
         <div id="description_div"></div>  
-        <div id="defTable_div"></div>
-        <button class="dialogButton" id="submit">Submit</button>
+    	<div class="editable ">
+           <div id="defTable_div"></div> 		
+    	</div>
+        <button class="dialogButton" id="submit" onclick="h.gui.saveDefTable()">Submit changes</button>
         <button class="dialogButton" id="values" 'disabled'=false onclick="h.gui.showValues();">Show values</button>
         <div id="valuesTable_div"></div>
     </div>
@@ -97,12 +100,12 @@
             height: 600,
             width: 800,
             show: {
-                effect: "blind",
-                duration: 600
+                effect: "scale",
+                duration: 400
             },
             hide: {
-                effect: "blind",
-                duration: 1600
+                effect: "scale",
+                duration: 400
             },
             buttons: {
                 Close: function () {

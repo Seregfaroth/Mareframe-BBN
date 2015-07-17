@@ -325,7 +325,11 @@ MareFrame.DST.Model = function()
     	return tempMatrix;
     }
 
-
+	this.update = function() {
+		elementArr.forEach(function(elmt) {
+			elmt.update();
+		})
+	}
     this.CreateNewElement = function () {
     	var e = new MareFrame.DST.Element();
         elementArr.push(e);
@@ -488,6 +492,7 @@ MareFrame.DST.Element = function ()
     var type = 1
     var connections = [];
     var values = [];
+    var updated = true;
     
     this.getData = function ()
     {
@@ -544,6 +549,12 @@ MareFrame.DST.Element = function ()
     {
         values = v;
     }
+    this.isUpdated = function() {
+    	return updated;
+    }
+    this.setUpdated = function(b) {
+    	updated = b;
+    }
     
 
     this.deleteConnection = function (id) {
@@ -577,7 +588,7 @@ MareFrame.DST.Element = function ()
     }
     
     this.updateValueArray = function(e) {
-    	var values = e.getValues();
+    	var values = [];
     	this.getConnections().forEach(function(c) {
     		if (c.getOutput().getName() === e.getName()) {
     			var inputElmt = c.getInput();
@@ -587,16 +598,33 @@ MareFrame.DST.Element = function ()
     	})
     	//TODO calculate values
     }
-    
+    this.update = function() {
+    	this.updateData(this);
+    	this.updateValueArray(this);
+    }
     this.updateData = function (e) {
-    	var data = e.getData();
+    	console.log("updateData " + e.getName());
+    	var data = []
+    	var originalData = e.getData();
+    	for (var i = originalData.length-1; i >= this.numOfHeaderRows(); i--) {
+    		console.log("i: " + i);
+    		console.log("new data: " + originalData[i]);
+    		data.unshift(originalData[i]);
+    	}
+    	// var tempData = e.getData()
+    	// var data = tempData[tempData.length - 1];
+    	console.log(data);
     	this.getConnections().forEach(function(c) {
     		if (c.getOutput().getName() === e.getName()) {
     			var inputElmt = c.getInput();
     			var newRow = inputElmt.getMainValues();
     			data.unshift(newRow);
+    			console.log("new row: " + newRow);
     		}
     	})
+    	console.log("updated data: ");
+    	console.log(data);
+    	this.setData(data);
     	
     }
     this.getMainValues = function() {
@@ -609,13 +637,24 @@ MareFrame.DST.Element = function ()
     		// console.log("check data: " + data[i][1]);
     		if (!isNaN(parseFloat(data[i][1])) || data[i][1] === undefined ) {
     			row.push(data[i][0]);   
-    			console.log("push data " + data[i][0]);
+    			//console.log("push data " + data[i][0]);
     		}
     	}
-    	console.log("new row: " + row);
+    	//console.log("new row: " + row);
     	return row;
     }
     
+    this.numOfHeaderRows = function() {
+    	var data = this.getData();
+		var counter = 0;
+		for (var i = 0; i < data.length; i++) {
+			//if cell contains text it is a header cell
+			if (isNaN(parseFloat(data[i][1])) && data[i][1] !== undefined) {
+				counter++;
+			}
+		}
+		return counter;
+	}
     this.toJSON = function () {
     	
     	return { posX: this.easelElmt.x, posY: this.easelElmt.y, elmtID: this.getID(), elmtName: name, elmtDesc: this.getDescription(), elmtType: this.getType(), elmtData: this.getData(), elmtWghtMthd: this.weightingMethod };
