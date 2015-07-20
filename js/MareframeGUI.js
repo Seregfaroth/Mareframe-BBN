@@ -229,8 +229,9 @@
 					if (e.which == 13) {
 						var newText = $(this).val();
 						if (isNaN(newText)) {
-							alert("Value must be a number"); //TODO find better solution than alert
-							//TODO make sure the numbers in one column add up to one, if it is a chance node
+							alert("Value must be a number");
+							//TODO find better solution than alert
+
 							$(this).parent().text(originalValue);
 						} else {
 							$(this).parent().text(newText);
@@ -243,8 +244,9 @@
 					var newText = $(this).val();
 					$(this).parent().text(newText);
 					if (isNaN(newText)) {
-						alert("Value must be a number"); //TODO find better solution than alert
-						//TODO make sure the numbers in one column add up to one, if it is a chance node
+						alert("Value must be a number");
+						//TODO find better solution than alert
+
 						$(this).parent().text(originalValue);
 					} else {
 						$(this).parent().text(newText);
@@ -274,7 +276,7 @@
 		});
 	}
 	this.showValues = function() {
-		var elmt = $("#detailsDialog").data("element");	
+		var elmt = $("#detailsDialog").data("element");
 		$("#valuesTable_div").html(this.htmlTableFromArray("Values", elmt));
 		$("#valuesTable_div").show();
 		$("#values").prop('disabled', true);
@@ -283,34 +285,52 @@
 	$("#detailsDialog").on('dialogclose', function(event) {
 		$("#valuesTable_div").hide();
 	});
-	
+
 	this.saveDefTable = function() {
 		var elmt = $("#detailsDialog").data("element");
 		var table = $("#defTable_div");
 		var newTable = [];
 		var newRow = [];
-		table.find("tr").each(function(){
+		table.find("tr").each(function() {
 			$(this).find("th,td").each(function() {
-				console.log("text to be added: " + $(this).text());
-				console.log("does it exsist: " + $.inArray($(this).text(), newRow) === -1)
+				// console.log("text to be added: " + $(this).text());
+				// console.log("does it exsist: " + $.inArray($(this).text(), newRow) === -1)
 				//Don't add the same value twice if it is in one of the header cells
 				//(Better solution: check before the text is saved in the cell)
-				if ($.inArray($(this).text(), newRow) === -1 || !isNaN($(this).text())) {					
+				if ($.inArray($(this).text(), newRow) === -1 || !isNaN($(this).text())) {
 					newRow.push($(this).text());
-				}	
+				}
 			});
 			newTable.push(newRow);
 			newRow = [];
 		});
 		//Remove header row with title the "Definition"
-		newTable.splice(0,1);
+		newTable.splice(0, 1);
+		if (!this.columnSumsAreValid(newTable, elmt.numOfHeaderRows()) && elmt.getType() == 0) {
+			//Should also show which row is unvalid (maybe right after the user has change the value)
+			alert("The values in each column must add up to 1");
+		} else {
+			elmt.setData(newTable);
+			elmt.setUpdated(false);
+		}
 		console.log("new table after submit:");
 		console.log(newTable);
-		elmt.setData(newTable);
-		elmt.setUpdated(false);
+
 	}
 
-
+	this.columnSumsAreValid = function(data, numOfHeaderRows) {
+		var sum = 0;
+		for (var i = 1; i < data[data.length - 1].length; i++) {
+			for (var j = numOfHeaderRows; j < data.length; j++) {
+				sum += parseFloat(data[j][i]);
+			}
+			if (sum !== 1) {
+				return false;
+			}
+			sum = 0;
+		}
+		return true;
+	}
 	function updateValFnCP(cPX, cPY) {
 
 		valueFnStage.removeAllChildren();
@@ -380,12 +400,12 @@
 		//console.log("mouse down at: ("+e.stageX+","+e.stageY+")");
 		oldX = e.stageX;
 		oldY = e.stageY;
-		console.log("target is: " + e.target);
+		//console.log("target is: " + e.target);
 		//console.log("cnctool options: "+$("#cnctTool").button("option","checked"));
 		if (e.target.name.substr(0, 4) === "elmt") {
 			if (document.getElementById("cnctTool").checked)//check if connect tool is enabled
 			{
-				console.log("cnctTool enabled");
+				//console.log("cnctTool enabled");
 				h.gui.connectTo(e);
 			} else {
 				h.gui.select(e);
@@ -577,39 +597,64 @@
 		update = true;
 	}
 	this.htmlTableFromArray = function(header, elmt) {
+		//TODO this method does not work correctly on value tables
 		if (header === "Definition") {
 			var data = elmt.getData();
-		}
-		else if (header === "Values") {
+		} else if (header === "Values") {
 			var data = elmt.getValues();
 		}
-		//console.log("data for html for " + header + " in " + elmt.getName());
-		//console.log(data);
+		console.log("data for html for " + header + " in " + elmt.getName());
+		console.log(data);
 		var numOfHeaderRows = elmt.numOfHeaderRows();
-		var htmlString = this.createHeaderTable(header, elmt);
-		for (var i = numOfHeaderRows; i < data.length; i++) {
+		var htmlString = "";
+		if (data[0] !== undefined) {
+			htmlString += "<tr><th style='text-align:center' colspan=\"" + data[0].length + "\">" + header + " </th></tr>";
+		} else {
+			htmlString += "<tr><th style='text-align:center'>" + header + " </th></tr>";
+		}
+		for (var i = 0; i < numOfHeaderRows; i++) {
 			htmlString += "<tr>";
-			for (var j = 0; j < data[i].length; j++) {
-
-				//if cell is in header column
-				if (j === 0) {
-					htmlString += ("<th>" + data[i][j] + "</th>");
-
-				}
-				//otherwise it is a normal cell
-				else {
-					htmlString += "<td>" + data[i][j] + "</td>";
-				}
+			for (var j = 0; j < (data[0].length); j++) {
+				htmlString += "<th>" + data[i][j] + "</th>";
 			}
 			htmlString += "</tr>";
-
 		}
+		for (var i = numOfHeaderRows; i < data.length; i++) {
+			htmlString += "<tr>";
+			for (var j = 0; j < (data[0].length); j++) {
+				if (j === 0) {
+					htmlString += "<th>" + data[i][j] + "</th>";
+				} else {
+					htmlString += "<td>" + (data[i][j]) + "</td>";
+				}
+
+			}
+			htmlString += "</tr>";
+		}
+		// var htmlString = this.createHeaderTable(header, elmt);
+		// for (var i = numOfHeaderRows; i < data.length; i++) {
+		// htmlString += "<tr>";
+		// for (var j = 0; j < data[i].length; j++) {
+		//
+		// //if cell is in header column
+		// if (j === 0) {
+		// htmlString += ("<th>" + data[i][j] + "</th>");
+		//
+		// }
+		// //otherwise it is a normal cell
+		// else {
+		// htmlString += "<td>" + data[i][j] + "</td>";
+		// }
+		// }
+		// htmlString += "</tr>";
+		//
+		// }
 		console.log("html table: " + htmlString);
 		return htmlString;
 	}
 
 	this.createHeaderTable = function(header, elmt) {
-		
+
 		var data = elmt.getData();
 		console.log("data for html header for " + header + " in " + elmt.getName());
 		console.log(data);
@@ -647,5 +692,7 @@
 		}
 		return htmlString;
 	}
-
+	this.round = function(numb) {
+		return Number(Math.round(numb + "e3")+"e-3");
+	}
 }
