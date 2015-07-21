@@ -254,7 +254,7 @@
 					$(this).parent().removeClass("editable");
 				});
 			});
-
+			//Prevent user from editing the top rows. That data should come from the child elements
 			$("th").dblclick(function() {
 				var originalText = $(this).text();
 				$(this).addClass("editable");
@@ -631,24 +631,6 @@
 			}
 			htmlString += "</tr>";
 		}
-		// var htmlString = this.createHeaderTable(header, elmt);
-		// for (var i = numOfHeaderRows; i < data.length; i++) {
-		// htmlString += "<tr>";
-		// for (var j = 0; j < data[i].length; j++) {
-		//
-		// //if cell is in header column
-		// if (j === 0) {
-		// htmlString += ("<th>" + data[i][j] + "</th>");
-		//
-		// }
-		// //otherwise it is a normal cell
-		// else {
-		// htmlString += "<td>" + data[i][j] + "</td>";
-		// }
-		// }
-		// htmlString += "</tr>";
-		//
-		// }
 		console.log("html table: " + htmlString);
 		return htmlString;
 	}

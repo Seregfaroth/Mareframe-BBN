@@ -564,7 +564,18 @@ MareFrame.DST.Element = function() {
 				children.push(c.getInput());
 			}
 		})
-		console.log(elmt.getName() + " children: " + children);
+		//console.log(elmt.getName() + " children: " + children);
+		return children;
+
+	}
+	this.getChildElementsByType = function(type) {
+		var elmt = this;
+		var children = [];
+		this.getConnections().forEach(function(c) {
+			if (c.getOutput().getName() === elmt.getName() && c.getInput().getType() === type) {
+				children.push(c.getInput());
+			}
+		})
 		return children;
 
 	}
@@ -578,37 +589,36 @@ MareFrame.DST.Element = function() {
 		return element;
 	}
 	this.calculateValue = function(variable) {
+		console.log("Caluculate value for " + variable);
 		var data = this.getData();
 		var value = 0;
 		switch (this.getType()) {
+		//Chance node
 		case 0:
-			//Chance node
-			//If the element has any child elements, calculate the value
-			if (this.getChildElements().length > 0) {
-				//Iterate down the tablerows
+				//For each table row
 				for (var i = 0; i < data.length; i++) {
 					//When the desired row is found
 					if (data[i][0] === variable) {
-						//Add each cell value times the probability of the condition
+						//For each cell in the row
 						for (var j = 1; j < (data[0]).length; j++) {
-							var element = this.getChildElementByName(data[0][0]);
-							value += data[i][j] * element.calculateValue(data[0][j]);
+							var tempValue = 1;
+							//For each of the above conditions
+							for (var n = 0; n < this.getChildElementsByType(0).length; n++) {
+								//Get the element that the condition belongs to
+								var element = this.getChildElementByName(data[n][0]);
+								if (element.getType() === 0) {//Chance node
+									tempValue *= element.calculateValue(data[n][j])
+									console.log("tempValue: " + tempValue);
+								}
+							}
+							value += data[i][j] * tempValue;
+							console.log("Value: " + value);
 						}
 					}
-				}
-
-			}
-			//Otherwise the value is equal to the defintion
-			else {
-				for (var i = 0; i < data.length; i++) {
-					if (data[i][0] === variable) {
-						value = data[i][1];
-					}
-				}
 			}
 			break;
 		default:
-			value = 0;
+			value = 1;
 			break
 		}
 		//Rounds
@@ -616,7 +626,7 @@ MareFrame.DST.Element = function() {
 
 	}
 	this.updateValueArray = function(elmt) {
-		//console.log("Updated values for " + elmt.getName());
+		console.log("Updated values for " + elmt.getName());
 		var defData = elmt.getData();
 		var values = [];
 		var numOfHeaderRows = elmt.numOfHeaderRows();
@@ -637,30 +647,32 @@ MareFrame.DST.Element = function() {
 		this.setUpdated = true;
 	}
 	this.updateData = function(e) {
-		console.log("updateData " + e.getName());
+		//console.log("updateData " + e.getName());
 		var data = []
 		var originalData = e.getData();
 		var rowLength = (originalData[0]).length - 1;
 		var myCounter = 0;
 		var combinationsBelow;
-
+		//Fill table from the bottom and up
 		for (var i = originalData.length - 1; i >= this.numOfHeaderRows(); i--) {
 			// console.log("i: " + i);
 			// console.log("new data: " + originalData[i]);
 			data.unshift(originalData[i]);
 		}
-		console.log("children: " + this.getChildElements());
 		this.getChildElements().forEach(function(elmt) {
 			var newRow = [];
 			var mainValues = elmt.getMainValues();
-
+			//console.log("child main values: " + mainValues)
 			newRow.push(mainValues[0]);
+			//console.log("counter = " + myCounter);
 			//The first row that is added
 			if (myCounter === 0) {
+				//console.log("new row length: " + newRow.length + ". table row length: " + rowLength);
 				//Add the elements until the row is full
 				while (newRow.length < rowLength) {
 					for (var i = 1; i < mainValues.length; i++) {
 						newRow.push(mainValues[i]);
+						// console.log("pushed to new row: " + mainValues[i]);
 					}
 				}
 				combinationsBelow = mainValues.length - 1;
@@ -675,12 +687,11 @@ MareFrame.DST.Element = function() {
 			}
 
 			data.unshift(newRow);
-			// console.log("new row: " + newRow);
+			//console.log("new row: " + newRow);
 			myCounter++;
 		})
-
-		console.log("updated data: ");
-		console.log(data);
+		// console.log("updated data: ");
+		// console.log(data);
 		this.setData(data);
 	}
 	this.getMainValues = function() {
