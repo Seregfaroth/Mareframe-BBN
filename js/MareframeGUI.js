@@ -1,14 +1,9 @@
 ﻿MareFrame.DST.GUIHandler = function() {
 	var editorMode = false;
 	var canvas = new createjs.Stage("MCATool");
-	var valueFnCanvas = new createjs.Stage("valueFn_canvas");
-	var controlP = new createjs.Shape();
-	var valueFnStage = new createjs.Container();
-	var valueFnLineCont = new createjs.Container();
 	var stage = new createjs.Container();
 	var googleColors = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac", "#b77322", "#16d620", "#b91383", "#f4359e", "#9c5935", "#a9c413", "#2a778d", "#668d1c", "#bea413", "#0c5922", "#743411"];
 	var hitArea = new createjs.Shape(new createjs.Graphics().beginFill("#ffffff").drawRect(0, 0, canvas.canvas.width, canvas.canvas.height));
-	var valFnBkGr = new createjs.Shape(new createjs.Graphics().beginFill("#ffffff").drawRect(0, 0, 100, 100));
 
 	hitArea.name = "hitarea";
 	if (editorMode)
@@ -16,17 +11,9 @@
 
 	hitArea.addEventListener("mousedown", mouseDown);
 
-	controlP.graphics.f("#615b4").s("#2045ff").rr(0, 0, 6, 6, 2);
-	valFnBkGr.addEventListener("pressmove", moveValFnCP);
-	valFnBkGr.addEventListener("mousedown", downValFnCP);
-	controlP.mouseChildren = false;
 
 	canvas.addChild(hitArea);
 	canvas.addChild(stage);
-	valueFnCanvas.addChild(valFnBkGr)
-	valueFnCanvas.addChild(valueFnLineCont);
-	valueFnCanvas.addChild(valueFnStage);
-	valueFnCanvas.addChild(controlP);
 	h.setGUI(this);
 
 	var update = true;
@@ -254,7 +241,7 @@
 					$(this).parent().removeClass("editable");
 				});
 			});
-			//Prevent user from editing the top rows. That data should come from the child elements
+			//TODO Prevent user from editing the top rows. That data should come from the child elements
 			$("th").dblclick(function() {
 				var originalText = $(this).text();
 				$(this).addClass("editable");
@@ -307,11 +294,12 @@
 		//Remove header row with title the "Definition"
 		newTable.splice(0, 1);
 		if (!this.columnSumsAreValid(newTable, elmt.numOfHeaderRows()) && elmt.getType() == 0) {
-			//Should also show which row is unvalid (maybe right after the user has change the value)
+			//Should also show which row is unvalid (maybe right after the user has changed the value)
 			alert("The values in each column must add up to 1");
 		} else {
 			elmt.setData(newTable);
 			elmt.setUpdated(false);
+			//TODO set all elements which are affected by this change to updated = false
 		}
 		console.log("new table after submit:");
 		console.log(newTable);
@@ -331,71 +319,12 @@
 		}
 		return true;
 	}
-	function updateValFnCP(cPX, cPY) {
-
-		valueFnStage.removeAllChildren();
-		var line = new createjs.Graphics().beginStroke("#0f0f0f").mt(0, 100).bt(cPX, cPY, cPX, cPY, 100, 0);
-		var plot = new createjs.Shape(line);
-		valueFnStage.addChild(plot);
-		valueFnCanvas.update();
-		update = true;
-		$("#valueFn_div").show();
-	}
-
-	function updateDataTableDiv(elmt) {
-		// var tableMat = h.getActiveModel().getWeightedData(elmt, false);
-		// tableMat.splice(0, 0, ["Scenario", "Value", "Weight"]);
-		//
-		// var tableData = new google.visualization.arrayToDataTable(tableMat);
-		// var table = new google.visualization.Table(document.getElementById('datatable_div'));
-		//
-		// table.draw(tableData, { 'allowHtml': true, 'alternatingRowStyle': true, 'width': '100%', 'height': '100%' });
-		// $('.google-visualization-table-table').width("100%");
-	}
 
 	function downValFnCP(e) {
 		oldX = e.stageX;
 		oldY = e.stageY;
 	}
 
-	function moveValFnCP(e) {
-		elmt = h.getActiveModel().getElement(e.target.name)
-		controlP.x = e.stageX;
-		controlP.y = e.stageY;
-		elmt.getData()[1] = e.stageX;
-		elmt.getData()[2] = e.stageY;
-		updateValFnCP(e.stageX, e.stageY);
-		updateDataTableDiv(elmt);
-
-		update = true;
-		h.gui.updateFinalScores();
-	}
-
-	function getValueFnLine(xValue, color) {
-		return new createjs.Graphics().beginStroke(color).mt(xValue, 0).lt(xValue, 100);
-	}
-
-
-	this.updateFinalScores = function() {
-		// var data = new google.visualization.arrayToDataTable(h.getActiveModel().getFinalScore());
-		// data.removeRow(data.getNumberOfRows()-1);
-		// finalScoreChart.draw(data, finalScoreChartOptions);
-	}
-
-	this.updateTable = function(matrix) {
-		var tableHTML = "";
-		//console.log(matrix);
-		matrix.forEach(function(row) {
-			tableHTML = tableHTML + "<tr style=\"border:1px solid black;height:64px\">";
-			for (var i = 1; i < row.length; i++) {
-				tableHTML = tableHTML + "<td contenteditable=true style=\"padding-right:10px;padding-left:5px;text-align:center;vertical-align:middle\">" + row[i] + "</td>";
-			}
-			tableHTML = tableHTML + "</tr>";
-		})
-
-		$("#editableDataTable").html(tableHTML);
-
-	}
 	function mouseDown(e) {
 		//console.log("mouse down at: ("+e.stageX+","+e.stageY+")");
 		oldX = e.stageX;
@@ -450,7 +379,6 @@
 		if (update) {
 			update = false;
 			canvas.update();
-			valueFnCanvas.update();
 		}
 	}
 
@@ -625,7 +553,7 @@
 				if (j === 0) {
 					htmlString += "<th>" + data[i][j] + "</th>";
 				} else {
-					htmlString += "<td>" + (data[i][j]) + "</td>";
+					htmlString += "<td>" + this.round((data[i][j])) + "</td>";
 				}
 
 			}
@@ -635,45 +563,6 @@
 		return htmlString;
 	}
 
-	this.createHeaderTable = function(header, elmt) {
-
-		var data = elmt.getData();
-		console.log("data for html header for " + header + " in " + elmt.getName());
-		console.log(data);
-		var numOfHeaderRows = elmt.numOfHeaderRows();
-		var numOfCellsInRow;
-		var expNumOfCellsInRow;
-		var htmlString = "";
-		if (data[data.length - 1] !== undefined) {
-			htmlString += "<tr><th style='text-align:center' colspan=\"" + data[data.length - 1].length + "\">" + header + " </th></tr>";
-		} else {
-			htmlString += "<tr><th style='text-align:center'>" + header + " </th></tr>";
-		}
-
-		for (var i = 0; i < numOfHeaderRows; i++) {
-			numOfCellsInRow = 0;
-			htmlString += "<tr>";
-			htmlString += ("<th>" + data[i][0] + "</th>");
-
-			if (i > 0) {
-				expNumOfCellsInRow = (data[i].length - 1) * (data[i - 1].length - 1);
-			} else {
-				expNumOfCellsInRow = (data[0].length - 1)
-			}
-
-			//fill row until it is full
-			while (numOfCellsInRow < expNumOfCellsInRow) {
-				for (var j = 1; j < data[i].length; j++) {
-					htmlString += ("<th colspan=\"" + (numOfHeaderRows - i) + "\">" + data[i][j] + "</th>");
-					numOfCellsInRow++;
-
-				}
-				// console.log("Row: " + i + " Cells: " + numOfCellsInRow)
-				// console.log("Expected number of cells: "+ expNumOfCellsInRow)
-			}
-		}
-		return htmlString;
-	}
 	this.round = function(numb) {
 		return Number(Math.round(numb + "e3")+"e-3");
 	}
