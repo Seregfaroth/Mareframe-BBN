@@ -525,15 +525,16 @@
 		update = true;
 	}
 	this.htmlTableFromArray = function(header, elmt) {
-		//TODO this method does not work correctly on value tables
 		if (header === "Definition") {
 			var data = elmt.getData();
+			var numOfHeaderRows = elmt.numOfHeaderRows();
 		} else if (header === "Values") {
 			var data = elmt.getValues();
+			var numOfHeaderRows = elmt.numOfDecisions();
 		}
 		console.log("data for html for " + header + " in " + elmt.getName());
 		console.log(data);
-		var numOfHeaderRows = elmt.numOfHeaderRows();
+		
 		var htmlString = "";
 		if (data[0] !== undefined) {
 			htmlString += "<tr><th style='text-align:center' colspan=\"" + data[0].length + "\">" + header + " </th></tr>";
