@@ -110,6 +110,8 @@
 			hitArea.addEventListener("pressmove", pressMove);
 		} else {
 			$(".header-bar").hide();
+			$("#reset").hide();
+			$("#cnctTool").attr("checked", false);
 			hitArea.removeEventListener("pressmove", pressMove);
 		}
 		var elementArr = h.getActiveModel().getElementArr();
@@ -428,9 +430,10 @@
 	}
 
 	this.addConnectionToStage = function(c) {
-		var line = new createjs.Graphics().beginStroke("#0f0f0f").mt(c.getInput().easelElmt.x, c.getInput().easelElmt.y).lt(c.getOutput().easelElmt.x, c.getOutput().easelElmt.y);
+		
+		var line = new createjs.Graphics().beginStroke(c.getColor()).mt(c.getInput().easelElmt.x, c.getInput().easelElmt.y).lt(c.getOutput().easelElmt.x, c.getOutput().easelElmt.y);
 		var conn = new createjs.Shape(line);
-		var arrow = new createjs.Graphics().beginFill("#0f0f0f").mt(-5, 0).lt(5, 5).lt(5, -5).cp();
+		var arrow = new createjs.Graphics().beginFill(c.getColor()).mt(-5, 0).lt(5, 5).lt(5, -5).cp();
 		var arrowCont = new createjs.Shape(arrow);
 		var cont = new createjs.Container();
 		//console.log(arrowCont);
@@ -455,7 +458,7 @@
 
 	this.updateConnection = function(c) {
 		//stage.removeChild(c.easelElmt);
-		c.easelElmt.getChildAt(1).graphics.clear().beginStroke("#0f0f0f").mt(c.getInput().easelElmt.x, c.getInput().easelElmt.y).lt(c.getOutput().easelElmt.x, c.getOutput().easelElmt.y);
+		c.easelElmt.getChildAt(1).graphics.clear().beginStroke(c.getColor()).mt(c.getInput().easelElmt.x, c.getInput().easelElmt.y).lt(c.getOutput().easelElmt.x, c.getOutput().easelElmt.y);
 		c.easelElmt.getChildAt(0).x = ((c.getInput().easelElmt.x - c.getOutput().easelElmt.x) / 2) + c.getOutput().easelElmt.x;
 		c.easelElmt.getChildAt(0).y = ((c.getInput().easelElmt.y - c.getOutput().easelElmt.y) / 2) + c.getOutput().easelElmt.y;
 		c.easelElmt.getChildAt(0).rotation = (180 / Math.PI) * Math.atan((c.getInput().easelElmt.y - c.getOutput().easelElmt.y) / (c.getInput().easelElmt.x - c.getOutput().easelElmt.x));
