@@ -374,6 +374,19 @@ MareFrame.DST.Element = function() {
 	this.getConnections = function() {
 		return connections;
 	}
+	this.addDefaultValues = function() {
+		// var data = this.getData();
+		// switch(this.getType()) {
+		// case 0://Chance node
+		// for (var n = 0; n < 2; n++) {
+		// data.push(["state" + n]);
+		// for (var i = 0; i < data[0].length; i++) {
+		// data[n].push(0.5);
+		// }
+		// }
+		//
+		// }
+	}
 	this.getChildElements = function() {
 		var elmt = this;
 		var children = [];
@@ -478,7 +491,7 @@ MareFrame.DST.Element = function() {
 			}
 			// console.log("result: " + this.getValues());
 			updated = true;
-		//Decision nodes
+			//Decision nodes
 		} else {
 			this.setValues(this.updateHeaderRows(this.copyDefArray()));
 			var values = this.getValues();
@@ -677,6 +690,7 @@ MareFrame.DST.Element = function() {
 		// console.log("numOfDiffValues " + numOfDiffValues)
 		if (table[0] !== undefined) {
 			var rowLength = table[0].length - 1;
+			// console.log("number of rows in original: " + table.length)
 			//For each row
 			for (var i = 0; i < table.length; i++) {
 				//For each different value in new header row
@@ -710,7 +724,7 @@ MareFrame.DST.Element = function() {
 		return newTable;
 	}
 	this.updateData = function() {
-		// console.log("updateData " + this.getName());
+		console.log("updateData " + this.getName());
 		var originalData = this.getData();
 		var newData = this.updateHeaderRows(originalData);
 		this.setData(newData);
@@ -720,9 +734,9 @@ MareFrame.DST.Element = function() {
 		var element = this;
 		var data = []
 		this.getChildElements().forEach(function(elmt) {
+			console.log("Child: " + elmt.getName());
 			data = element.addNewHeaderRow(elmt.getMainValues(), data);
 		})
-		var rowLength = (originalData[0]).length - 1;
 		//Add original values to the table
 		for (var i = this.numOfHeaderRows(); i < originalData.length; i++) {
 			// console.log("i: " + i);
@@ -792,6 +806,7 @@ MareFrame.DST.Connection = function(eIn, eOut) {
 	} else {
 		var color = "black";
 	}
+	
 	this.getColor = function() {
 		return color;
 	}

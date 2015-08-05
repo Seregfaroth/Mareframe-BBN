@@ -412,13 +412,16 @@
 		//console.log("attempting connection "+elmtIdent);
 		h.gui.getSelected().forEach(function(e) {
 			if (e.name.substr(0, 4) === "elmt" && e.name !== elmtIdent) {
-
-				var c = new MareFrame.DST.Connection(h.getActiveModel().getElement(e.name), h.getActiveModel().getElement(elmtIdent));
-				//console.log("connection: " + c);
+				var outputElmt = h.getActiveModel().getElement(elmtIdent);
+				var c = new MareFrame.DST.Connection(h.getActiveModel().getElement(e.name), outputElmt);
 				if (h.getActiveModel().addConnection(c)) {
 					h.gui.addConnectionToStage(c);
 					connected = true;
 				}
+				if (outputElmt.getType() !== 1){
+					outputElmt.updateData();
+				}
+				//console.log("connection: " + c);
 				pause(1);
 
 			}
