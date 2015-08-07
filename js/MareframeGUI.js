@@ -284,10 +284,15 @@
 			$(this).find("th,td").each(function() {
 				// console.log("text to be added: " + $(this).text());
 				// console.log("does it exsist: " + $.inArray($(this).text(), newRow) === -1)
+				var value = $(this).text();
 				//Don't add the same value twice if it is in one of the header cells
 				//(Better solution: check before the text is saved in the cell)
-				if ($.inArray($(this).text(), newRow) === -1 || !isNaN($(this).text())) {
-					newRow.push($(this).text());
+				if ($.inArray(value, newRow) === -1 || !isNaN(value)) {	
+					//Convert to number
+					if (!isNaN(value)) {
+						value = Number(value);
+					}
+					newRow.push(value);
 				}
 			});
 			newTable.push(newRow);
@@ -304,7 +309,7 @@
 			//TODO set all elements which are affected by this change to updated = false
 		}
 		console.log("new table after submit:");
-		console.log(newTable);
+		console.log(elmt.getData());
 
 	}
 
@@ -314,7 +319,7 @@
 			for (var j = numOfHeaderRows; j < data.length; j++) {
 				sum += parseFloat(data[j][i]);
 			}
-			if (sum !== 1) {
+			if (sum < 0.9999 || sum > 1.0001) {
 				return false;
 			}
 			sum = 0;
