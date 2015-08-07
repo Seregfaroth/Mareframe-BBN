@@ -374,6 +374,15 @@ MareFrame.DST.Element = function() {
 	this.getConnections = function() {
 		return connections;
 	}
+	this.update = function() {
+		if (!this.isUpdated()) {//Only update if it has not already been updated
+			if (this.getType() !== 1) {//Definition table in decision nodes does not rely on parents
+				this.updateData();
+			}
+			this.calculateValues();
+			this.setUpdated(true);
+		}
+	}
 	this.addDefaultValues = function() {
 		// var data = this.getData();
 		// switch(this.getType()) {
@@ -387,55 +396,45 @@ MareFrame.DST.Element = function() {
 		//
 		// }
 	}
-	this.getChildElements = function() {
+	this.getParentElements = function() {
 		var elmt = this;
-		var children = [];
+		var parents = [];
 		this.getConnections().forEach(function(c) {
 			if (c.getOutput().getName() === elmt.getName()) {
-				children.push(c.getInput());
+				parents.push(c.getInput());
 			}
 		})
-		//console.log(elmt.getName() + " children: " + children);
-		return children;
+		//console.log(elmt.getName() + " parents: " + parents);
+		return parents;
 
 	}
-	this.getChildElementsByType = function(type) {
+	this.getParentElementsByType = function(type) {
 		var elmt = this;
-		var children = [];
+		var parents = [];
 		this.getConnections().forEach(function(c) {
 			if (c.getOutput().getName() === elmt.getName() && c.getInput().getType() === type) {
-				children.push(c.getInput());
+				parents.push(c.getInput());
 			}
 		})
-		return children;
+		return parents;
 
 	}
-	this.getChildElementByName = function(name) {
+	this.getParentElementByName = function(name) {
 		console.log("in")
-		this.getChildElements().forEach(function(elmt) {
+		this.getParentElements().forEach(function(elmt) {
 			if (elmt.getName() === name) {
 				console.log("returned " + elmt.getName())
 				return elmt;
 			} else {
-				var nextChild = elmt.getChildElementByName(name)
-				if (nextChild !== undefined) {
-					console.log("returned " + nextChild.getName())
-					return nextChild;
+				var nextParent = elmt.getParentElementByName(name)
+				if (nextParent !== undefined) {
+					console.log("returned " + nextParent.getName())
+					return nextParent;
 				}
 			}
 		})
 	}
 
-	this.update = function() {
-		if (!this.isUpdated()) {//Only update if it is not already updated
-			if (this.getType() !== 1) {//Definition table in decision nodes does not rely on children
-				this.updateData();
-			}
-			if (this.updateValues()) {
-				this.setUpdated(true);
-			}
-		}
-	}
 	this.updateValues = function() {
 		var updated = false;
 		var model = h.getActiveModel();
@@ -449,7 +448,7 @@ MareFrame.DST.Element = function() {
 			// console.log("number of header rows in defData: " + numOfHeaderRows);
 			var headerElement;
 			var isChoiceConditioned = false;
-			var childValues;
+			var parentValues;
 			//For each header row
 			for (var n = numOfHeaderRows - 1; n >= 0; n--) {
 				// console.log("n: " + n);
@@ -461,15 +460,15 @@ MareFrame.DST.Element = function() {
 						headerElement.update();
 					}
 					// console.log("header element is a chance node");
-					childValues = headerElement.getValues();
-					numOfDecisionsInChild = headerElement.numOfDecisions()
-					// console.log("child values:\n" + childValues)
+					parentValues = headerElement.getValues();
+					numOfDecisionsInParent = headerElement.numOfDecisions()
+					// console.log("Parent values:\n" + ParentValues)
 					//Add decisions to values table
-					//For each decision in the childs values table
-					for (var i = 0; i < numOfDecisionsInChild; i++) {
-						// console.log("There are decisions in the childs value table")
+					//For each decision in the Parents values table
+					for (var i = 0; i < numOfDecisionsInParent; i++) {
+						// console.log("There are decisions in the Parents value table")
 						//Add the decision to the values table
-						var newValues = this.addNewHeaderRow(childValues[i], values);
+						var newValues = this.addNewHeaderRow(parentValues[i], values);
 						numOfHeaderRows++;
 						isChoiceConditioned = true;
 						this.setValues(newValues);
@@ -478,9 +477,9 @@ MareFrame.DST.Element = function() {
 						// console.log("header element values: " + headerElement.getValues());
 					}
 					//Calculate the new value in each cell
-					this.calculateNewValues(n, numOfHeaderRows, numOfDecisionsInChild, isChoiceConditioned);
+					this.calculateNewValues(n, numOfHeaderRows, numOfDecisionsInParent, isChoiceConditioned);
 
-					//Sum values that belong to the same child element but different condions
+					//Sum values that belong to the same Parent element but different condions
 					this.sumValues(n, numOfHeaderRows);
 
 					isChoiceConditioned = false;
@@ -542,7 +541,7 @@ MareFrame.DST.Element = function() {
 		// console.log("higest " + highest)
 		return highest;
 	}
-	this.calculateNewValues = function(rowNumber, numOfHeaderRows, numOfDecisionsInChild, isChoiceConditioned) {
+	this.calculateNewValues = function(rowNumber, numOfHeaderRows, numOfDecisionsInParent, isChoiceConditioned) {
 		var values = this.getValues();
 		// console.log("calculating new values from " + values);
 		var n = rowNumber;
@@ -555,7 +554,7 @@ MareFrame.DST.Element = function() {
 			for (var j = 1; j < values[0].length; j++) {
 				if (isChoiceConditioned) {
 					//Create an array with the conditions
-					var conditions = this.arrayFromValuesColumn(j, n - numOfDecisionsInChild, n - 1);
+					var conditions = this.arrayFromValuesColumn(j, n - numOfDecisionsInParent, n - 1);
 					values[i][j] *= headerElement.getValueWithCondition(values[n][j], conditions)[0];
 					//There is only one
 				} else {
@@ -672,7 +671,7 @@ MareFrame.DST.Element = function() {
 		}
 	}
 	this.addNewHeaderRow = function(headerRow, table) {
-		// console.log("Adding array: " + headerRow)
+		console.log("Adding array: " + headerRow)
 		var array = headerRow.slice();
 		//Convert the array to only contain one of each element
 		var newArray = [array[0]];
@@ -683,7 +682,7 @@ MareFrame.DST.Element = function() {
 		}
 		// console.log("converted array: " + newArray)
 		array = newArray;
-		// console.log("to " + table);
+		console.log("to " + table);
 		// console.log("number of header rows: " + numOfHeaderRows);
 		var newTable = [];
 		var numOfDiffValues = array.length - 1;
@@ -717,7 +716,7 @@ MareFrame.DST.Element = function() {
 				newRow.push(array[j]);
 			}
 		}
-		// console.log("new header row: " + newRow);
+		console.log("new header row: " + newRow);
 		//Add the new row to the table
 		newTable.splice(this.numOfHeaderRows() - 1, 0, newRow);
 		// console.log("new table: " + newTable)
@@ -733,8 +732,8 @@ MareFrame.DST.Element = function() {
 		// console.log("updating header rows")
 		var element = this;
 		var data = []
-		this.getChildElements().forEach(function(elmt) {
-			console.log("Child: " + elmt.getName());
+		this.getParentElements().forEach(function(elmt) {
+			console.log("Parent: " + elmt.getName());
 			data = element.addNewHeaderRow(elmt.getMainValues(), data);
 		})
 		//Add original values to the table
@@ -745,6 +744,233 @@ MareFrame.DST.Element = function() {
 		}
 		return data;
 	}
+	this.calculateValues = function() {
+		var model = h.getActiveModel();
+		if (this.getType() !== 1) {//If its a chance or value node
+			// console.log("calculate valeus for " + this.getName());
+			var element = this;
+			var data = this.getData();
+			var headerRows = [];
+			var takenIntoAccount = [];
+			var newValues = getMatrixWithoutHeader(data);
+			this.getParentElements().forEach(function(elmt) {
+				if (elmt.getType() === 0) {//If Parent is a chance
+					//The parents which already have been evaluated
+					takenIntoAccount.push(elmt)
+					var submatrices = element.createSubMatrices(newValues, takenIntoAccount);
+					//Must be updated
+					if (!elmt.isUpdated()) {
+						elmt.update();
+					}
+					var parentValuesMatrix = getMatrixWithoutHeader(elmt.getValues());
+					//For each submatrix calculate new values
+					var result = makeSureItsAnArray([math.multiply(submatrices[0], parentValuesMatrix)]);
+					for (var i = 1; i < submatrices.length; i++) {
+						result.push(makeSureItsAnArray(math.multiply(submatrices[i], parentValuesMatrix)));
+					}
+					newValues = concatMatrices(result);
+				} else if (elmt.getType() === 1) {//If Parent is a decision
+					headerRows = element.addNewHeaderRow(elmt.getMainValues(), headerRows)
+				}
+			})
+			newValues = convertToArray(newValues);
+			console.log(newValues)
+			if (newValues[0][0] === undefined) {//It's one dimensional
+				console.log("one-dimensional")
+				newValues.unshift(data[this.numOfHeaderRows()][0]);
+			} else {
+				for (var i = 0; i < newValues.length; i++) {
+					console.log("unshifting " + newValues[i])
+					newValues[i].unshift(data[i + this.numOfHeaderRows()][0]);
+				}
+			}
+			if (headerRows.length > 0) {//If there have been added header rows
+				headerRows.push(newValues);
+				newValues = headerRows;
+			}
+			console.log("new values: " + newValues)
+			this.setValues(newValues);
+		} else {
+			this.setValues(this.updateHeaderRows(this.copyDefArray()));
+			var values = this.getValues();
+			//Number of header rows is equal to number of rows in values minus number of rows in deftinition
+			var numOfHeaderRows = values.length - this.getData().length;
+			//If there are no header rows add an empty column for the values
+			if (numOfHeaderRows === 0) {
+				for (var i = 0; i < values.length; i++) {
+					values[i].push([]);
+				}
+			}
+			//For each value row
+			for (var i = numOfHeaderRows; i < values.length; i++) {
+				//For each values column
+				for (var j = 1; j < values[0].length; j++) {
+					//Get the conditions for this value
+					var conditions = this.arrayFromValuesColumn(j, 0, numOfHeaderRows - 1);
+					conditions.push(values[i][0]);
+					var value = 0;
+					//For each value node in the model
+					model.getElementArr().forEach(function(elmt) {
+						if (elmt.getType() === 2) {
+							//If the node is not updated, update
+							if (!elmt.isUpdated()) {
+								elmt.update();
+							}
+							//Sum values that meet the conditions
+							var valueArray = elmt.getValueWithCondition("Value", conditions);
+							//If there are several values that meet the condition, use the highest
+							value += elmt.getHighest(valueArray);
+						}
+					})
+					values[i][j] = value;
+				}
+			}
+		}
+	}
+	concatMatrices = function(list) {
+		var matrix = list[0];
+		for (var i = 1; i < list.length; i++) {
+			matrix = math.concat(matrix, list[i]);
+		}
+		return matrix;
+	}
+	makeSureItsAnArray = function(value) {
+		if (math.size(value).valueOf()[1] === undefined) {
+			value = [value];
+		}
+		return value;
+	}
+	convertToArray = function(matrix) {
+		console.log("converting to array: " + matrix)
+		var rows = math.size(matrix).valueOf()[0];
+		var columns = math.size(matrix).valueOf()[1];
+		console.log("rows: " + rows + " columns: " + columns)
+		var array = [];
+		var newRow = [];
+		//For each row
+		for (var i = 0; i < rows; i++) {
+			if (columns === undefined) {//Its one-dimensional
+				array.push(math.subset(matrix, math.index(i)));
+			} else {
+				//For each column
+				for (var j = 0; j < columns; j++) {
+					console.log("pushing value " + math.subset(matrix, math.index(i, j)))
+					newRow.push(math.subset(matrix, math.index(i, j)));
+				}
+				array.push(newRow);
+				newRow = [];
+			}
+		}
+		console.log("returned: " + array)
+		console.log(array)
+		return array;
+	}
+	this.createSubMatrices = function(matrix, takenIntoAccount) {
+		console.log("create sub matrix from " + matrix + " for values " + takenIntoAccount[takenIntoAccount.length - 1].getMainValues())
+		var data = this.getData();
+		console.log("data: " + data)
+		var subMatrices = [];
+		console.log(math.size(matrix))
+		var columns = math.size(matrix).valueOf()[1];
+		var added = [];
+		console.log("columns: " + columns)
+		//For each column
+		for (var n = 1; n < columns; n++) {
+			//If column has not already been added
+			if (added.indexOf(n) === -1) {
+				var currentColumn = math.flatten(getColumn(data, n));
+				console.log("looking for column: " + currentColumn)
+				var newMatrix = getColumn(matrix, n - 1);
+				newMatrix = makeSureItsAnArray(newMatrix);
+				var rightColumn = true;
+				//Look through the rest of the columns
+				for (var i = n + 1; i <= columns; i++) {
+					var columnValues = math.flatten(getColumn(data, i));
+					//For each header value in column
+					for (var j = 0; j < this.numOfHeaderRows(); j++) {
+						//If the value is not found this is not a matching column
+						if (currentColumn.indexOf(data[j][i]) === -1) {
+							console.log(data[j][i] + " was not found in " + currentColumn)
+							rightColumn = false;
+							//But if the value has already been taken into account it is right
+							takenIntoAccount.forEach(function(elmt) {
+								console.log("checking " + elmt.getMainValues()[0] + " against " + data[j][0])
+								if (elmt.getMainValues()[0] === data[j][0]) {
+									rightColumn = true;
+								}
+							})
+						}
+						if (!rightColumn) {
+							break;
+						}
+
+					}
+					//If this column is right, add it to the matrix
+					if (rightColumn) {
+						added.push(i);
+						console.log("found the column")
+						var column = getColumn(matrix, i - 1);
+						console.log("concat " + newMatrix + " and " + column)
+						column = makeSureItsAnArray(column);
+						newMatrix = math.concat(newMatrix, column)
+						console.log("new matrix:" + newMatrix);
+					}
+				}
+				subMatrices.push(newMatrix);
+			}
+		}
+		console.log("returned " + subMatrices)
+		return subMatrices;
+	}
+	function getMatrixWithoutHeader(matrix) {
+		console.log("get matrix without header from " + matrix)
+		var numOfColumns = math.size(matrix)[1];
+		var numOfRows = math.size(matrix)[0];
+		console.log("numOfRows: " + numOfRows)
+		console.log("numOfColumns: " + numOfColumns)
+		var newMatrix = [];
+		//For each row
+		for (var i = 0; i < numOfRows; i++) {
+			//If there is a number in column 2 in this row, this is not a header row
+			// console.log("i: " + i)
+			// console.log("subset: " + math.subset(matrix, math.index(i, 1)));
+			if (!(isNaN(math.subset(matrix, math.index(i, 1))))) {
+				var row = math.squeeze(getRow(matrix, i));
+				// console.log("row " + i+ ": " + row + " length " + row.length)
+				range = math.range(1, row.length)
+				row = math.subset(row, math.index(math.squeeze(range)))
+				if (row.length === undefined) {
+					row = [row];
+				}
+				// console.log(row)
+				newMatrix.push(row);
+				// console.log("newMatrix: "+ newMatrix)
+			}
+		}
+		console.log("returned: " + newMatrix)
+		console.log(newMatrix)
+		return newMatrix;
+	}
+
+	function getColumn(matrix, index) {
+		console.log("get column " + index + " from " + matrix)
+		var rows = math.size(matrix).valueOf()[0];
+		var range = math.range(0, rows);
+		console.log("returned: " + math.subset(matrix, math.index(range, index)))
+		return math.subset(matrix, math.index(range, index));
+	}
+
+	function getRow(matrix, index) {
+		console.log("get row " + index + " from " + matrix)
+		console.log("size: " + math.size(matrix))
+		var columns = math.size(matrix).valueOf()[1];
+		var range = [];
+		for ( n = 0; n < columns; n++) {
+			range.push(n);
+		}
+		return math.subset(matrix, math.index(index, range));
+	}
+
 	//returns the different variables (conditions or choices) that belong to the element
 	this.getMainValues = function() {
 		var row = [];
@@ -806,7 +1032,7 @@ MareFrame.DST.Connection = function(eIn, eOut) {
 	} else {
 		var color = "black";
 	}
-	
+
 	this.getColor = function() {
 		return color;
 	}
@@ -856,7 +1082,12 @@ MareFrame.DST.Connection = function(eIn, eOut) {
 }
 
 $(document).ready(function() {
-
+	// var array1 = [[0.6399999999999999], [0.24000000000000005], [0.12000000000000002]]
+	// var array2 = [[0.6399999999999999], [0.24000000000000005], [0.12000000000000002]]
+	// console.log("size before concating: " + math.size(array));
+	// console.log(array[0]);
+	// newValues = math.concat(array[0], array[1]);
+	// console.log("size after concating: " + math.size(array));
 	h = new MareFrame.DST.Handler();
 
 	if (MareFrame.DST.GUIHandler) {
